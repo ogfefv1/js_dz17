@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            text-align: center;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+        .card.flipped, .card.matched {
+            background-color: #2ecc71;
+        }
+        .card.matched {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <button id="gameButton">Start</button>
+        <div class="cards" id="cards"></div>
+    </div>
+    <script>
+        const cardArray = [
+            'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
+            'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
+        ];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        
+        function shuffle() 
+        {
+            cardArray.sort(() => 0.5 - Math.random());
+            const cardsContainer = document.getElementById('cards');
+            cardsContainer.innerHTML = '';
+            cardArray.forEach(card => 
+            {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.card = card;
+                cardElement.addEventListener('click', flipCard);
+                cardsContainer.appendChild(cardElement);
+            }
+        );
+    }
+        
+        function flipCard() 
+        {
+            if 
+            (lockBoard) return;
+            if 
+            (this === firstCard) return;
+
+            this.textContent = this.dataset.card;
+            this.classList.add('flipped');
+
+            if 
+            (!hasFlippedCard) 
+            {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() 
+        {
+            let isMatch = firstCard.dataset.card === secondCard.dataset.card;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() 
+        {
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+
+            resetBoard();
+            checkWin();
+        }
+
+        function unflipCards() 
+        {
+            lockBoard = true;
+            setTimeout(() => 
+            {
+                firstCard.textContent = '';
+                secondCard.textContent = '';
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                resetBoard();
+            }, 
+            2000);
+        }
+
+        function resetBoard() 
+        {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        function checkWin() 
+        {
+            if 
+            (document.querySelectorAll('.card.matched').length === cardArray.length) 
+                {
+                alert('Congratulations! You have won!');
+                document.getElementById('gameButton').textContent = 'Start';
+            }
+        }
+
+        document.getElementById('gameButton').addEventListener('click', function() 
+        {
+            if 
+            (this.textContent === 'Start') 
+            {
+                shuffle();
+                this.textContent = 'Finish';
+            } 
+            else 
+            {
+                document.querySelectorAll('.card').forEach(card => 
+                {
+                    card.textContent = card.dataset.card;
+                    card.classList.add('matched');
+                }
+            );
+                this.textContent = 'Start';
+            }
+        }
+    );
+
+        shuffle();
+    </script>
+</body>
+</html>
